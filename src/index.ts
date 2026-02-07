@@ -19,7 +19,7 @@ init(config.anthropicApiKey, {
 registerBuiltinTools();
 
 try {
-  const result = await runAgentLoop(message);
+  const result = await runAgentLoop(message, "cli:default");
   console.log(result.content);
   console.log(
     `\n[tokens: ${result.usage.input} in, ${result.usage.output} out]`,
