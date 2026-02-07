@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts"
+    "dev": "tsx src/index.ts",
+    "telegram": "tsx src/telegram.ts"
   },
   "repository": {
     "type": "git",
@@ -11,7 +12,8 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.73.0"
+    "@anthropic-ai/sdk": "^0.73.0",
+    "grammy": "^1.39.3"
   },
   "devDependencies": {
     "@types/node": "^25.2.1",

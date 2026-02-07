@@ -15,18 +15,25 @@ cp bot.config.example.ts bot.config.ts
 Simple chat:
 
 ```bash
-npx tsx src/index.ts "Hey, can you tell me a joke?"
+npm run dev "Hey, can you tell me a joke?"
 ```
 
 With tool use:
 
 ```bash
-npx tsx src/index.ts "Can you tell me which libraries are installed in the package.json file?"
+npm run dev "Can you tell me which libraries are installed in the package.json file?"
+```
+
+Session persistence (the CLI reuses the same session across calls)
+
+```bash
+npm run dev "My name is Alice"
+npm run dev "What's my name?"
 ```
 
 ## Tools
 
-The agent can call tools in a loop — it decides when to use them, executes locally, and feeds results back until done.
+The agent can call tools in a loop, it decides when to use them, executes locally, and feeds results back until done.
 
 Built-in tools:
 
@@ -40,3 +47,52 @@ Built-in tools:
 
 1. Create `src/tools/your_tool.ts` implementing the `Tool` type (name, description, JSON Schema params, execute fn)
 2. Register it in `registerBuiltinTools()` in `src/tools/registry.ts`
+
+## Sessions
+
+Conversations are persisted as JSONL files in `.sandgarden-bot/sessions/`. Each message (user or assistant) is one JSON line. The agent loads the last 50 (MAX_HISTORY) messages as history for context continuity.
+
+Session IDs:
+
+- CLI: `cli:default`
+- Telegram: `telegram:<chat_id>` (automatic per user)
+
+## Telegram
+
+Run the bot as a Telegram DM assistant using long-polling (no server needed).
+
+### Configuration
+
+Add to `bot.config.ts`:
+
+```ts
+telegramBotToken: "123456:ABC-DEF...",
+allowedChatIds: [123456789],  // your Telegram user ID
+```
+
+### Run
+
+```bash
+npm run telegram
+```
+
+The bot responds to private text messages from whitelisted chat IDs.
+
+**commands**
+/start: just prints a welcome message
+/new: start a new conversation (clears the current session)
+
+<details>
+<summary>How to set up a Telegram bot</summary>
+
+1. Message [@BotFather](https://t.me/BotFather) on Telegram
+2. Send `/newbot`, follow the prompts to pick a name and username
+3. Copy the bot token into `telegramBotToken` in your config
+
+**Getting your chat ID:**
+
+1. Message [@userinfobot](https://t.me/userinfobot) on Telegram
+2. It replies with your user/chat ID
+3. Add that number to `allowedChatIds`
+
+</details>

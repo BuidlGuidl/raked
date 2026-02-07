@@ -2,6 +2,8 @@ export type BotConfig = {
   anthropicApiKey: string;
   model?: string;
   maxTokens?: number;
+  telegramBotToken?: string;
+  allowedChatIds?: number[];
 };
 
 const DEFAULTS = {
@@ -9,7 +11,10 @@ const DEFAULTS = {
   maxTokens: 4096,
 } as const;
 
-export async function loadConfig(): Promise<Required<BotConfig>> {
+export type ResolvedConfig = Required<Pick<BotConfig, "anthropicApiKey" | "model" | "maxTokens">> &
+  Pick<BotConfig, "telegramBotToken" | "allowedChatIds">;
+
+export async function loadConfig(): Promise<ResolvedConfig> {
   let mod: { default: BotConfig };
 
   const configPath = new URL("../bot.config.js", import.meta.url).href;
@@ -33,5 +38,7 @@ export async function loadConfig(): Promise<Required<BotConfig>> {
     anthropicApiKey: raw.anthropicApiKey,
     model: raw.model ?? DEFAULTS.model,
     maxTokens: raw.maxTokens ?? DEFAULTS.maxTokens,
+    telegramBotToken: raw.telegramBotToken,
+    allowedChatIds: raw.allowedChatIds,
   };
 }
