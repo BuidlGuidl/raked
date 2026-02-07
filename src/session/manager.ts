@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, appendFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, appendFileSync, unlinkSync } from "fs";
 import { join } from "path";
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages.js";
 
@@ -46,6 +46,13 @@ export function appendToSession(sessionId: string, messages: MessageParam[]): vo
   });
 
   appendFileSync(path, lines.join("\n") + "\n");
+}
+
+export function clearSession(sessionId: string): boolean {
+  const path = sessionPath(sessionId);
+  if (!existsSync(path)) return false;
+  unlinkSync(path);
+  return true;
 }
 
 function isToolResultMessage(msg: MessageParam): boolean {
