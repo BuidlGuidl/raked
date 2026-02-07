@@ -16,7 +16,6 @@ export function buildSystemPrompt(): string {
   return [identity(), dynamicContext()].join("\n\n");
 }
 
-// TODO: history will be populated by session persistence (iteration 4)
 export function buildMessages(
   history: MessageParam[],
   userMessage: string,
