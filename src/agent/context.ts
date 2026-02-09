@@ -1,4 +1,5 @@
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages.js";
+import { readMemory } from "./memory.js";
 
 function identity(): string {
   return [
@@ -15,8 +16,27 @@ function dynamicContext(): string {
   return `Current time: ${now}\nWorking directory: ${cwd}`;
 }
 
+function memoryContext(): string {
+  const content = readMemory();
+  if (!content) return "";
+  return `## Long-term Memory\n${content}`;
+}
+
+function memoryInstructions(): string {
+  return [
+    "## Memory Instructions",
+    '- Save when the user explicitly asks ("remember X").',
+    "- Save autonomously when you detect noteworthy facts or preferences — no confirmation needed.",
+    "- Keep notes concise. Only save durable facts, not ephemeral context.",
+  ].join("\n");
+}
+
 export function buildSystemPrompt(): string {
-  return [identity(), dynamicContext()].join("\n\n");
+  const parts = [identity(), dynamicContext()];
+  const mem = memoryContext();
+  if (mem) parts.push(mem);
+  parts.push(memoryInstructions());
+  return parts.join("\n\n");
 }
 
 export function buildMessages(

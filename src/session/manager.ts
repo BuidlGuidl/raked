@@ -3,6 +3,7 @@ import { join } from "path";
 import type { MessageParam } from "@anthropic-ai/sdk/resources/messages.js";
 
 const SESSIONS_DIR = join(process.cwd(), ".sandgarden-bot", "sessions");
+const DAILY_DIR = join(SESSIONS_DIR, "daily");
 
 type SessionEntry = {
   role: "user" | "assistant";
@@ -31,10 +32,15 @@ export function load(sessionId: string): MessageParam[] {
   }, []);
 }
 
+function dailyPath(): string {
+  const date = new Date().toISOString().slice(0, 10);
+  return join(DAILY_DIR, `${date}.jsonl`);
+}
+
 export function appendToSession(sessionId: string, messages: MessageParam[]): void {
   if (!existsSync(SESSIONS_DIR)) mkdirSync(SESSIONS_DIR, { recursive: true });
+  if (!existsSync(DAILY_DIR)) mkdirSync(DAILY_DIR, { recursive: true });
 
-  const path = sessionPath(sessionId);
   const now = new Date().toISOString();
   const lines = messages.map((msg) => {
     const entry: SessionEntry = {
@@ -45,7 +51,9 @@ export function appendToSession(sessionId: string, messages: MessageParam[]): vo
     return JSON.stringify(entry);
   });
 
-  appendFileSync(path, lines.join("\n") + "\n");
+  const data = lines.join("\n") + "\n";
+  appendFileSync(sessionPath(sessionId), data);
+  appendFileSync(dailyPath(), data);
 }
 
 export function clearSession(sessionId: string): boolean {
