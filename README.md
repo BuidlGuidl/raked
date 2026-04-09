@@ -38,19 +38,7 @@ These are the core AI agent pieces and how they connect.
 
 The fundamental cycle every AI agent runs. The LLM can request actions (tool calls), get results back, and keep going until it's done.
 
-```
-user message
-    ↓
-  build context (identity + memory + available skills + session history + tool definitions)
-    ↓
-┌─→ LLM ──→ stop_reason: end? ──→ done
-│    ↓
-│   stop_reason: tool_use
-│    ↓
-│   execute tool(s)
-│    ↓
-└── tool_result(s) back to LLM
-```
+<img src="agent_loop.excalidraw.svg" width="700" alt="raked logo" />
 
 Before the first LLM call, the agent assembles everything the model needs into a single request: a **system prompt** (identity, current time, memory contents, available skills), the **conversation history** (last 50 messages from the session), and **tool definitions** (name, description, JSON schema for each tool). The LLM uses all of this to decide what to say or which tools to call.
 
