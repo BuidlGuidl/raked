@@ -2,6 +2,8 @@ import type Anthropic from "@anthropic-ai/sdk";
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
+let lastStopReason: Anthropic.Messages.Message["stop_reason"] | undefined;
+
 export function isProviderLogEnabled(): boolean {
   return process.env.PROVIDER_LOG === "1";
 }
@@ -30,6 +32,9 @@ export async function logProviderExchange(params: {
     await appendFile(jsonlPath, `${JSON.stringify(entry)}\n`, "utf8");
   } catch {
     // Best-effort logging; ignore failures.
+  } finally {
+    // Used to label the next exchange in the same process.
+    lastStopReason = params.response.stop_reason ?? undefined;
   }
 }
 
@@ -43,10 +48,11 @@ type ExchangeEntry = {
 function formatExchange(entry: ExchangeEntry): string {
   const { ts, request, response } = entry;
   const toolNames = (request.tools ?? []).map((t) => t.name);
+  const isToolUseFollowup = lastStopReason === "tool_use";
 
   const out: string[] = [];
   out.push("=".repeat(80));
-  out.push(`LLM EXCHANGE @ ${ts}`);
+  out.push(`${isToolUseFollowup ? "TOOL_USE" : "LLM EXCHANGE"} @ ${ts}`);
   out.push("");
 
   out.push("REQUEST");
